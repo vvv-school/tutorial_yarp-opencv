@@ -1,0 +1,37 @@
+<application>
+    <name>Fixture for Tutorial on robot vision tracking with yarp + opencv </name>
+    <description>A fixture to prepare components required for the tutorial</description>
+    <version>1.0</version>
+    <authors>
+        <author email="vadim.tikhanoff@iit.it">Vadim Tikhanoff</author>
+    </authors>
+    <module>
+        <name>yarp-opencv</name>
+        <node>testnode</node>
+    </module>
+    <module>
+        <name>yarpview</name>
+        <node>testnode</node>
+        <parameters>--name /output --x 0 --y 0 --RefreshTime 33 </parameters>
+    </module>
+    <module>
+        <name>yarpview</name>
+        <node>testnode</node>
+        <parameters>--name /mask --x 300 --y 0 --RefreshTime 33 </parameters>
+    </module>
+    <connection>
+        <from>/icub/camcalib/left/out</from>
+        <to>/yarp-opencv/image:i</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/yarp-opencv/image:o</from>
+        <to>/output</to>
+        <protocol>tcp</protocol>
+    </connection>
+    <connection>
+        <from>/yarp-opencv/mask:o</from>
+        <to>/mask</to>
+        <protocol>tcp</protocol>
+    </connection>
+</application>

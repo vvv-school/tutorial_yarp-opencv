@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<suit name="Test Tutorial tracking with yarp+opencv">
+    <description>Testing the tutorial on tracking with yarp+opencv </description>
+    <fixture param="--fixture fixture.xml"> yarpmanager </fixture>
+
+    <test type="dll"> TestTutorialYarpOpencv </test>
+</suit>
