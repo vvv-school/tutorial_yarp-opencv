@@ -25,9 +25,9 @@
 ### Read an Image from a stream using port callback
 
 #VSLIDE
-### Read an Image from a stream using port callback 
+### Read an Image from a stream using port callback
 
-######<div style="text-align: left;">Code </div>
+<!--######<div style="text-align: left;">Code </div> -->
 ```c++
 class Processing : public yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >
 {
