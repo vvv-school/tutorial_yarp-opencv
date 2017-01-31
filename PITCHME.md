@@ -3,7 +3,7 @@
 ### Robot vision tutorial with OpenCV
 ### <span style="color:#e49436">Part Two</span>
 ---
-#### YARP OPENCV
+#### YARP & OPENCV
 
 #HSLIDE
 ### Goals of this Tutorial
@@ -52,59 +52,47 @@ void onRead( yarp::sig::ImageOf<yarp::sig::PixelRgb> &img ){
 }
 ```
 #HSLIDE
-### Stream the image onto a YARP port
+### Some Image Processing techniques
 
 #VSLIDE
-### Stream the image onto a YARP port
-
+### Some Image Processing techniques
+######<div style="text-align: left;">Spatial Filters </div>
 ```c++
-yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >    imageOutPort;
+cv::GaussianBlur(redBallOnly, redBallOnly, cv::Size(gausian_size, gausian_size), 2, 2);
 
+```
+######<div style="text-align: left;">Morphology </div>
+```c++
+cv::dilate(redBallOnly, redBallOnly, cv::Mat(), cv::Point(-1,-1), dilate_niter, cv::BORDER_CONSTANT, cv::morphologyDefaultBorderValue());
 ```
 ---
 ```c++
-imageOutPort.open(("/"+getName("/image:o")).c_str());
+cv::erode(redBallOnly, redBallOnly, cv::Mat(), cv::Point(-1,-1), erode_niter, cv::BORDER_CONSTANT, cv::morphologyDefaultBorderValue());
 ```
----
+######<div style="text-align: left;">Detect Circles </div>
 ```c++
-imageOutPort.close();
-```
----
-```c++
-cvtColor(out_image, out_image, CV_BGR2RGB);
-
-IplImage yarpImg = out_image;
-outImg.resize(yarpImg.width, yarpImg.height);
-cvCopy( &yarpImg, (IplImage *) outImg.getIplImage());
-
-imageOutPort.write();
+cv::HoughCircles(redBallOnly, circles, CV_HOUGH_GRADIENT, 1, redBallOnly.rows / 8, HIGH_THRESHOLD, HOUGH_MIN_VOTES, HOUGH_MIN_RADIUS, HOUGH_MAX_RADIUS);
 ```
 
 #HSLIDE
-### Run the template tracker algorithm
+### Draw and display results
 
 #VSLIDE
-### Run the template tracker algorithm
-######<div style="text-align: left;">IDL Services </div>
+### Draw and display results
 ```c++
-/**
- * use template matching on image with desired template and
- * desired method
- * @param template name of the image to be loaded.
- * @param name of method: 0=SQDIFF, 1=SQDIFF NORMED,
- * 2=TM CCORR, 3=TM CCORR NORMED, 4=TM COEFF, 5=TM COEFF NORMED
- * @return Bottle containing the 2D position.
- */
-Bottle templateMatch(1:string image, 2:i32 method);
-```
-######<div style="text-align: left;">template methods </div>
-```c++
-//Use the OpenCV function matchTemplate to search for matches between an
-//image patch and an input image
-void matchTemplate(InputArray image, InputArray templ, OutputArray result, int method);
-//Use the OpenCV function minMaxLoc to find the maximum and minimum values
-//(as well as their positions) in a given array.
-void minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
+for (size_t i = 0; i < circles.size(); i++)
+{
+    cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+    int radius = cvRound(circles[i][2]);
+    // circle center
+    circle(in_cv, center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
+    // circle outline
+    circle(in_cv, center, radius, cv::Scalar(0, 0, 255), 3, 8, 0);
+
+    yarp::os::Bottle &t=outTargets.addList();
+    t.addDouble(center.x);
+    t.addDouble(center.y);
+}
 ```
 
 #HSLIDE
