@@ -7,52 +7,25 @@
 
 #HSLIDE
 ### Goals of this Tutorial
- - find <span style="color:#e49436">Wally</span> :-)
- - integrating <span style="color:#e49436">YARP</span> with <span style="color:#e49436">OpenCV</span>
- - yarp::os::<span style="color:#e49436">RFModule</span>
+ - Track something <span style="color:#e49436">round</span> and <span style="color:#e49436">red</span> :-)
+ - integrating <span style="color:#e49436">YARP</span> with <span style="color:#e49436">OpenCV</span> while getting
+ <span style="color:#e49436">live</span> image <span style="color:#e49436">streams</span>.
+ - yarp::os::<span style="color:#e49436">RFModule</span> with port Callbacks
  - <span style="color:#e49436">Thrift</span> services
  - performing simple <span style="color:#e49436">image processing</span> operations
 
 #VSLIDE
 ### Let's plan what to do...
- - Change <span style="color:#e49436">CMakeLists.txt</span> to find <span style="color:#e49436">OpenCV</span> correctly
- - <span style="color:#e49436">Load</span> image containing the full scene.
+ - <span style="color:#e49436">Receive</span> a stream of images from a port
  - Display it: <span style="color:#e49436">stream</span> it through a <span style="color:#e49436">yarp port</span> to a <span style="color:#e49436">yarpviewer</span>.
  - <span style="color:#e49436">Load</span> wally's <span style="color:#e49436">template</span> and run the <span style="color:#e49436">template matching</span> algorithm with correct method to figure out where wally is in the scene
- - Modify the streamed image to <span style="color:#e49436">display</span> the <span style="color:#e49436">location</span> of wally.
+ - Modify the streamed image to <span style="color:#e49436">display</span> the <span style="color:#e49436">location</span> of the red and round object.
 
 #HSLIDE
-### CMakeLists modifications
+### Read an Image from a stream
 
 #VSLIDE
-### CMakeLists modifications
-######<div style="text-align: left;">CMakeLists additions </div>
-```CMakeLists
-find_package(YARP REQUIRED)
-find_package(ICUBcontrib REQUIRED)
-find_package(OpenCV REQUIRED)
-```
-
-```CMakeLists
-include_directories(${YARP_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
-```
-
-```CMakeLists
-target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES}
-                                      ${OpenCV_LIBRARIES})
-```
----
-######<div style="text-align: left;">Code headers additions </div>
-```c++
-#include <opencv2/core/core.hpp>
-#include <opencv2/opencv.hpp>
-```
-
-#HSLIDE
-### Load an image
-
-#VSLIDE
-### Load an image
+### Read an Image from a stream
 
 ######<div style="text-align: left;">IDL Services </div>
 ```c++
