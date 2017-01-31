@@ -27,27 +27,32 @@
 #VSLIDE
 ### Read an Image from a stream
 
-######<div style="text-align: left;">IDL Services </div>
-```c++
-/**
- * Load the two required images.
- * @param mainImage name of the image to be loaded.
- * @return true/false on success/failure.
- */
-bool load(1:string image);
-```
----
-
 ######<div style="text-align: left;">Code </div>
 ```c++
-yarp::os::ResourceFinder rf;
-rf.setVerbose();
-rf.setDefaultContext(this->rf->getContext().c_str());
+class Module : public yarp::os::RFModule, public yarpOpencv_IDL
+{
+...    
+};
 
-std::string imageStr = rf.findFile(image.c_str());
-
-cv::Mat inputImage;
-inputImage = cv::imread(imageStr, CV_LOAD_IMAGE_COLOR);
+```
+```
+class Processing : public yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >
+{
+bool open(){
+    this->useCallback();
+    BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >::open( "/" + moduleName + "/image:i" );
+    ...
+}
+void interrupt(){
+    BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >::interrupt();
+}
+void close()(){
+    BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >::close();
+}
+void onRead( yarp::sig::ImageOf<yarp::sig::PixelRgb> &img )
+{
+    cv::Mat in_cv = cv::cvarrToMat((IplImage *)img.getIplImage());
+}
 ```
 #HSLIDE
 ### Stream the image onto a YARP port
