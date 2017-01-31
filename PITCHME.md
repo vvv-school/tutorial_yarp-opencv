@@ -10,15 +10,15 @@
  - Track something <span style="color:#e49436">round</span> and <span style="color:#e49436">red</span> :-)
  - integrating <span style="color:#e49436">YARP</span> with <span style="color:#e49436">OpenCV</span> while getting
  <span style="color:#e49436">live</span> image <span style="color:#e49436">streams</span>.
- - yarp::os::<span style="color:#e49436">RFModule</span> with port Callbacks
+ - yarp::os::<span style="color:#e49436">RFModule</span> with port <span style="color:#e49436">Callbacks</span>
  - <span style="color:#e49436">Thrift</span> services
  - performing simple <span style="color:#e49436">image processing</span> operations
 
 #VSLIDE
 ### Let's plan what to do...
  - <span style="color:#e49436">Receive</span> a stream of images from a port
+ - Use some <span style="color:#e49436">image processing</span> techniques to make things easier.
  - Display it: <span style="color:#e49436">stream</span> it through a <span style="color:#e49436">yarp port</span> to a <span style="color:#e49436">yarpviewer</span>.
- - <span style="color:#e49436">Load</span> wally's <span style="color:#e49436">template</span> and run the <span style="color:#e49436">template matching</span> algorithm with correct method to figure out where wally is in the scene
  - Modify the streamed image to <span style="color:#e49436">display</span> the <span style="color:#e49436">location</span> of the red and round object.
 
 #HSLIDE
