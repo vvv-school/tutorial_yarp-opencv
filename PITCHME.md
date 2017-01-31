@@ -29,13 +29,6 @@
 
 ######<div style="text-align: left;">Code </div>
 ```c++
-class Module : public yarp::os::RFModule, public yarpOpencv_IDL
-{
-...    
-};
-
-```
-```
 class Processing : public yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >
 {
 bool open(){
