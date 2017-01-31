@@ -27,12 +27,15 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>
 
+#include <vector>
+#include <iostream>
+
 #include "yarpOpencv_IDL.h"
 
-const int CANNY_HIGH_THRESHOLD = 80;
+const int HIGH_THRESHOLD = 80;
 const int HOUGH_MIN_VOTES = 15;
 const int HOUGH_MIN_RADIUS = 10;
-const int HOUGH_MAX_RADIUS = 60;
+const int HOUGH_MAX_RADIUS = 30;
 
 /********************************************************/
 class Processing : public yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >
@@ -44,6 +47,15 @@ class Processing : public yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::P
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >    outPort;
     yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelMono> >   edgesPort;
     yarp::os::BufferedPort<yarp::os::Bottle>  targetPort;
+
+    std::vector<int32_t> lowBound;
+    std::vector<int32_t> highBound;
+    
+    yarp::os::Mutex mutex;
+    
+    int dilate_niter;
+    int erode_niter;
+    int gausian_size;
 
 public:
     /********************************************************/
@@ -69,6 +81,18 @@ public:
         edgesPort.open("/" + moduleName + "/mask:o");
         targetPort.open("/"+ moduleName + "/target:o");
 
+        lowBound.push_back(200);
+        lowBound.push_back(0);
+        lowBound.push_back(0);
+        
+        highBound.push_back(255);
+        highBound.push_back(41);
+        highBound.push_back(20);
+        
+        dilate_niter = 4;
+        erode_niter = 0;
+        gausian_size = 9;
+        
         return true;
     }
 
@@ -102,16 +126,28 @@ public:
         cv::Mat in_cv = cv::cvarrToMat((IplImage *)img.getIplImage());
 
         cv::Mat redBallOnly;
-        cv::inRange(in_cv, cv::Scalar(200, 0, 0), cv::Scalar(255, 41, 20), redBallOnly);
+        
+        mutex.lock();
+        
+        cv::inRange(in_cv, cv::Scalar(lowBound[0], lowBound[1], lowBound[2]), cv::Scalar(highBound[0], highBound[1], highBound[2]), redBallOnly);
+        
+        mutex.unlock();
 
-        cv::GaussianBlur(redBallOnly, redBallOnly, cv::Size(9, 9), 2, 2);
+        mutex.lock();
+        cv::GaussianBlur(redBallOnly, redBallOnly, cv::Size(gausian_size, gausian_size), 2, 2);
+        mutex.unlock();
 
-        int dilate_niter = 4;
-        cv::dilate(redBallOnly, redBallOnly, cv::Mat(), cv::Point(-1,-1), 4, cv::BORDER_CONSTANT, cv::morphologyDefaultBorderValue());
-
+        mutex.lock();
+        cv::dilate(redBallOnly, redBallOnly, cv::Mat(), cv::Point(-1,-1), dilate_niter, cv::BORDER_CONSTANT, cv::morphologyDefaultBorderValue());
+        mutex.unlock();
+        
+        mutex.lock();
+        cv::erode(redBallOnly, redBallOnly, cv::Mat(), cv::Point(-1,-1), erode_niter, cv::BORDER_CONSTANT, cv::morphologyDefaultBorderValue());
+        mutex.unlock();
+        
         std::vector<cv::Vec3f> circles;
 
-        cv::HoughCircles(redBallOnly, circles, CV_HOUGH_GRADIENT, 1, redBallOnly.rows / 8, CANNY_HIGH_THRESHOLD, HOUGH_MIN_VOTES, HOUGH_MIN_RADIUS, HOUGH_MAX_RADIUS);
+        cv::HoughCircles(redBallOnly, circles, CV_HOUGH_GRADIENT, 1, redBallOnly.rows / 8, HIGH_THRESHOLD, HOUGH_MIN_VOTES, HOUGH_MIN_RADIUS, HOUGH_MAX_RADIUS);
 
         yDebug("Found %lu circles", circles.size());
 
@@ -145,6 +181,95 @@ public:
         cvCopy( &edges, (IplImage *) outEdges.getIplImage());
         edgesPort.write();
     }
+
+    /********************************************************/
+    bool setLowerBound(const int32_t r, const int32_t g, const int32_t b)
+    {
+        mutex.lock();
+        lowBound.clear();
+        lowBound.push_back(r);
+        lowBound.push_back(g);
+        lowBound.push_back(b);
+        mutex.unlock();
+        return true;
+    }
+    /********************************************************/
+    bool setUpperBound(const int32_t r, const int32_t g, const int32_t b)
+    {
+        mutex.lock();
+        highBound.clear();
+        highBound.push_back(r);
+        highBound.push_back(g);
+        highBound.push_back(b);
+        mutex.unlock();
+        return true;
+    }
+    
+    /********************************************************/
+    bool setDilateIter(const int32_t iter)
+    {
+        mutex.lock();
+        dilate_niter = iter;
+        mutex.unlock();
+        return true;
+    }
+    
+    /********************************************************/
+    bool setErodeIter(const int32_t iter)
+    {
+        mutex.lock();
+        erode_niter = iter;
+        mutex.unlock();
+        return true;
+    }
+    
+    /********************************************************/
+    bool setGausianSize(const int32_t size)
+    {
+        mutex.lock();
+        gausian_size = size;
+        mutex.unlock();
+        return true;
+    }
+    
+    /********************************************************/
+    std::vector<int32_t> getLowerBound()
+    {
+        std::vector<int32_t> v;
+        mutex.lock();
+        v = lowBound;
+        mutex.unlock();
+        
+        return v;
+    }
+    
+    /********************************************************/
+    std::vector<int32_t> getUpperBound()
+    {
+        std::vector<int32_t> v;
+        mutex.lock();
+        v = highBound;
+        mutex.unlock();
+        return v;
+    }
+    
+    /********************************************************/
+    int32_t getDilateIter()
+    {
+        return dilate_niter;
+    }
+    
+    /********************************************************/
+    int32_t getErodeIter()
+    {
+        return erode_niter;
+    }
+    
+    /********************************************************/
+    int32_t getGausianSize()
+    {
+        return gausian_size;
+    }
 };
 
 
@@ -167,6 +292,74 @@ class Module : public yarp::os::RFModule, public yarpOpencv_IDL
 
 public:
 
+    /********************************************************/
+    bool setLowerBound(const int32_t r, const int32_t g, const int32_t b)
+    {
+        processing->setLowerBound(r, g, b);
+        return true;
+    }
+    /********************************************************/
+    bool setUpperBound(const int32_t r, const int32_t g, const int32_t b)
+    {
+        processing->setUpperBound(r, g, b);
+        return true;
+    }
+    
+    /********************************************************/
+    bool setDilateIter(const int32_t iter)
+    {
+        processing->setDilateIter(iter);
+        return true;
+    }
+    
+    /********************************************************/
+    bool setErodeIter(const int32_t iter)
+    {
+        processing->setErodeIter(iter);
+        return true;
+    }
+    
+    /********************************************************/
+    bool setGausianSize(const int32_t size)
+    {
+        bool success = true;
+        if (size & 0x01)
+            processing->setGausianSize(size);
+        else
+            success = false;
+        
+        return success;
+    }
+    
+    /********************************************************/
+    std::vector<int32_t> getLowerBound()
+    {
+        return processing->getLowerBound();
+    }
+    
+    /********************************************************/
+    std::vector<int32_t> getUpperBound()
+    {
+        return processing->getUpperBound();
+    }
+    
+    /********************************************************/
+    int32_t getDilateIter()
+    {
+        return processing->getDilateIter();
+    }
+    
+    /********************************************************/
+    int32_t getErodeIter()
+    {
+        return processing->getErodeIter();
+    }
+    /********************************************************/
+    int32_t getGausianSize()
+    {
+        return processing->getGausianSize();
+    }
+    
     /********************************************************/
     bool configure(yarp::os::ResourceFinder &rf)
     {

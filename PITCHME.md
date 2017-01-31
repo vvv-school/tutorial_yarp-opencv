@@ -7,74 +7,49 @@
 
 #HSLIDE
 ### Goals of this Tutorial
- - find <span style="color:#e49436">Wally</span> :-)
- - integrating <span style="color:#e49436">YARP</span> with <span style="color:#e49436">OpenCV</span>
- - yarp::os::<span style="color:#e49436">RFModule</span>
+ - Track something <span style="color:#e49436">round</span> and <span style="color:#e49436">red</span> :-)
+ - integrating <span style="color:#e49436">YARP</span> with <span style="color:#e49436">OpenCV</span> while getting
+ <span style="color:#e49436">live</span> image <span style="color:#e49436">streams</span>.
+ - yarp::os::<span style="color:#e49436">RFModule</span> with port <span style="color:#e49436">Callbacks</span>
  - <span style="color:#e49436">Thrift</span> services
  - performing simple <span style="color:#e49436">image processing</span> operations
 
 #VSLIDE
 ### Let's plan what to do...
- - Change <span style="color:#e49436">CMakeLists.txt</span> to find <span style="color:#e49436">OpenCV</span> correctly
- - <span style="color:#e49436">Load</span> image containing the full scene.
+ - <span style="color:#e49436">Receive</span> a stream of images from a port
+ - Use some <span style="color:#e49436">image processing</span> techniques to make things easier.
  - Display it: <span style="color:#e49436">stream</span> it through a <span style="color:#e49436">yarp port</span> to a <span style="color:#e49436">yarpviewer</span>.
- - <span style="color:#e49436">Load</span> wally's <span style="color:#e49436">template</span> and run the <span style="color:#e49436">template matching</span> algorithm with correct method to figure out where wally is in the scene
- - Modify the streamed image to <span style="color:#e49436">display</span> the <span style="color:#e49436">location</span> of wally.
+ - Modify the streamed image to <span style="color:#e49436">display</span> the <span style="color:#e49436">location</span> of the red and round object.
 
 #HSLIDE
-### CMakeLists modifications
+### Read an Image from a stream using port callback
 
 #VSLIDE
-### CMakeLists modifications
-######<div style="text-align: left;">CMakeLists additions </div>
-```CMakeLists
-find_package(YARP REQUIRED)
-find_package(ICUBcontrib REQUIRED)
-find_package(OpenCV REQUIRED)
-```
+### Read an Image from a stream using port callback
 
-```CMakeLists
-include_directories(${YARP_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
-```
-
-```CMakeLists
-target_link_libraries(${PROJECT_NAME} ${YARP_LIBRARIES}
-                                      ${OpenCV_LIBRARIES})
-```
----
-######<div style="text-align: left;">Code headers additions </div>
+<!--######<div style="text-align: left;">Code </div> -->
 ```c++
-#include <opencv2/core/core.hpp>
-#include <opencv2/opencv.hpp>
+class Module : public yarp::os::RFModule, public yarpOpencv_IDL
+{
+    ...
 ```
-
-#HSLIDE
-### Load an image
-
-#VSLIDE
-### Load an image
-
-######<div style="text-align: left;">IDL Services </div>
 ```c++
-/**
- * Load the two required images.
- * @param mainImage name of the image to be loaded.
- * @return true/false on success/failure.
- */
-bool load(1:string image);
-```
----
-
-######<div style="text-align: left;">Code </div>
-```c++
-yarp::os::ResourceFinder rf;
-rf.setVerbose();
-rf.setDefaultContext(this->rf->getContext().c_str());
-
-std::string imageStr = rf.findFile(image.c_str());
-
-cv::Mat inputImage;
-inputImage = cv::imread(imageStr, CV_LOAD_IMAGE_COLOR);
+class Processing : public yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >
+{
+bool open(){
+    this->useCallback();
+    BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >::open( "/" + moduleName + "/image:i" );
+    ...
+}
+void interrupt(){
+    BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >::interrupt();
+}
+void close()(){
+    BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >::close();
+}
+void onRead( yarp::sig::ImageOf<yarp::sig::PixelRgb> &img ){
+    cv::Mat in_cv = cv::cvarrToMat((IplImage *)img.getIplImage());
+}
 ```
 #HSLIDE
 ### Stream the image onto a YARP port
