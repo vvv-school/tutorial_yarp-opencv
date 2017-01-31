@@ -22,10 +22,10 @@
  - Modify the streamed image to <span style="color:#e49436">display</span> the <span style="color:#e49436">location</span> of the red and round object.
 
 #HSLIDE
-### Read an Image from a stream
+### Read an Image from a stream using port callback
 
 #VSLIDE
-### Read an Image from a stream
+### Read an Image from a stream using port callback 
 
 ######<div style="text-align: left;">Code </div>
 ```c++
@@ -42,8 +42,7 @@ void interrupt(){
 void close()(){
     BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >::close();
 }
-void onRead( yarp::sig::ImageOf<yarp::sig::PixelRgb> &img )
-{
+void onRead( yarp::sig::ImageOf<yarp::sig::PixelRgb> &img ){
     cv::Mat in_cv = cv::cvarrToMat((IplImage *)img.getIplImage());
 }
 ```
