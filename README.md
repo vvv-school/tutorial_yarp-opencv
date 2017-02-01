@@ -1,5 +1,6 @@
 Robot vision with OpenCV tutorial part two
 ==========================
+[![GitPitch](https://gitpitch.com/assets/badge.svg)](https://gitpitch.com/vvv-school/tutorial_yarp-opencv/master?grs=github&t=moon)
 
 This second tutorial will guide you through integrating YARP with OpenCV while getting live image streams.
 
