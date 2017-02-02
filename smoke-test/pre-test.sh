@@ -8,9 +8,11 @@
 
 yarp where
 if [ $? -eq 0 ]; then
-   kill_yarp="no"
+   export stop_yarpserver="no"
+   echo "stop_yarpserver == no"
 else
-   kill_yarp="yes"
+   export stop_yarpserver="yes"
+   echo "stop_yarpserver == yes"
    yarpserver --write &
    sleep 1
 fi
