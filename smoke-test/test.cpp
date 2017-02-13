@@ -7,8 +7,10 @@
 #include <cmath>
 #include <algorithm>
 
-#include <rtf/yarp/YarpTestCase.h>
+#include <yarp/rtf/TestCase.h>
 #include <rtf/dll/Plugin.h>
+#include <rtf/TestAssert.h>
+
 
 #include <yarp/os/Network.h>
 #include <yarp/os/BufferedPort.h>
@@ -17,14 +19,14 @@
 using namespace RTF;
 
 /**********************************************************************/
-class TestTutorialYarpOpencv : public YarpTestCase
+class TestTutorialYarpOpencv : public yarp::rtf::TestCase
 {
     yarp::os::BufferedPort<yarp::os::Bottle> port;
 
 public:
     /******************************************************************/
     TestTutorialYarpOpencv() :
-        YarpTestCase("TestTutorialYarpOpencv")
+        yarp::rtf::TestCase("TestTutorialYarpOpencv")
     {
     }
 
