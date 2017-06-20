@@ -44,11 +44,11 @@ if [ $? -eq 0 ]; then
         ret=$?
     else
         echo -e "${red}test-type is missing!${nc}"
-        ret=4
+        ret=252
     fi
 else
     echo -e "${red}GitHub seems unreachable${nc}"
-    ret=4
+    ret=252
 fi
 
 cd ../
