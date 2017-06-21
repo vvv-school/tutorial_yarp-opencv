@@ -20,8 +20,7 @@ list(APPEND CMAKE_MODULE_PATH ${YARP_MODULE_PATH})
 # add include directories
 include_directories(${CMAKE_SOURCE_DIR}
                     ${RTF_INCLUDE_DIRS}
-                    ${YARP_INCLUDE_DIRS}
-                    ${YARP_HELPERS_INCLUDE_DIR})
+                    ${YARP_INCLUDE_DIRS})
 
 # add the source codes to build the plugin library
 add_library(${PROJECT_NAME} MODULE test.cpp)
