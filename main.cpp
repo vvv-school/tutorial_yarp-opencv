@@ -128,9 +128,46 @@ public:
 
         cv::Mat redBallOnly;
         
-        //
-        //let's fill things in
-        //
+        mutex.lock();
+        
+        cv::inRange(in_cv, cv::Scalar(lowBound[0], lowBound[1], lowBound[2]), cv::Scalar(highBound[0], highBound[1], highBound[2]), redBallOnly);
+        
+        mutex.unlock();
+
+        mutex.lock();
+        cv::GaussianBlur(redBallOnly, redBallOnly, cv::Size(gausian_size, gausian_size), 2, 2);
+        mutex.unlock();
+
+        mutex.lock();
+        cv::dilate(redBallOnly, redBallOnly, cv::Mat(), cv::Point(-1,-1), dilate_niter, cv::BORDER_CONSTANT, cv::morphologyDefaultBorderValue());
+        mutex.unlock();
+        
+        mutex.lock();
+        cv::erode(redBallOnly, redBallOnly, cv::Mat(), cv::Point(-1,-1), erode_niter, cv::BORDER_CONSTANT, cv::morphologyDefaultBorderValue());
+        mutex.unlock();
+        
+        std::vector<cv::Vec3f> circles;
+
+        cv::HoughCircles(redBallOnly, circles, CV_HOUGH_GRADIENT, 1, redBallOnly.rows / 8, HIGH_THRESHOLD, HOUGH_MIN_VOTES, HOUGH_MIN_RADIUS, HOUGH_MAX_RADIUS);
+
+        yDebug("Found %lu circles", circles.size());
+
+        outTargets.clear();
+
+        // Draw the circles detected
+        for (size_t i = 0; i < circles.size(); i++)
+        {
+            cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+            int radius = cvRound(circles[i][2]);
+            // circle center
+            circle(in_cv, center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
+            // circle outline
+            circle(in_cv, center, radius, cv::Scalar(0, 0, 255), 3, 8, 0);
+
+            yarp::os::Bottle &t=outTargets.addList();
+            t.addDouble(center.x);
+            t.addDouble(center.y);
+        }
         
         if (outTargets.size() > 0)
             targetPort.write();
@@ -140,10 +177,10 @@ public:
         cvCopy( &colour, (IplImage *) outImage.getIplImage());
         outPort.write();
 
-        //IplImage edges = redBallOnly;
-        //outEdges.resize(edges.width, edges.height);
-        //cvCopy( &edges, (IplImage *) outEdges.getIplImage());
-        //edgesPort.write();
+        IplImage edges = redBallOnly;
+        outEdges.resize(edges.width, edges.height);
+        cvCopy( &edges, (IplImage *) outEdges.getIplImage());
+        edgesPort.write();
     }
 
     /********************************************************/
