@@ -124,14 +124,13 @@ public:
 
         outEdges.zero();
 
-        cv::Mat in_cv = cv::cvarrToMat((IplImage *)img.getIplImage());
+        cv::Mat in_cv = cv::cvarrToMat((IplImage *)outImage.getIplImage());
+        outImage = img;
 
-        cv::Mat redBallOnly;
+        cv::Mat redBallOnly = cv::cvarrToMat((IplImage *)outEdges.getIplImage());
         
         mutex.lock();
-        
         cv::inRange(in_cv, cv::Scalar(lowBound[0], lowBound[1], lowBound[2]), cv::Scalar(highBound[0], highBound[1], highBound[2]), redBallOnly);
-        
         mutex.unlock();
 
         mutex.lock();
@@ -172,14 +171,7 @@ public:
         if (outTargets.size() > 0)
             targetPort.write();
 
-        IplImage colour = in_cv;
-        outImage.resize(colour.width, colour.height);
-        cvCopy( &colour, (IplImage *) outImage.getIplImage());
         outPort.write();
-
-        IplImage edges = redBallOnly;
-        outEdges.resize(edges.width, edges.height);
-        cvCopy( &edges, (IplImage *) outEdges.getIplImage());
         edgesPort.write();
     }
 
