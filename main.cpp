@@ -130,23 +130,27 @@ public:
         cv::Mat redBallOnly = cv::cvarrToMat((IplImage *)outEdges.getIplImage());
         
         mutex.lock();
+        //void inRange(InputArray src, InputArray lowerb, InputArray upperb, OutputArray dst)
         cv::inRange(in_cv, cv::Scalar(lowBound[0], lowBound[1], lowBound[2]), cv::Scalar(highBound[0], highBound[1], highBound[2]), redBallOnly);
         mutex.unlock();
 
         mutex.lock();
+        //void GaussianBlur(InputArray src, OutputArray dst, Size ksize, double sigmaX=0, double sigmaY=0, int borderType=BORDER_DEFAULT )
         cv::GaussianBlur(redBallOnly, redBallOnly, cv::Size(gausian_size, gausian_size), 2, 2);
         mutex.unlock();
 
         mutex.lock();
+        //void dilate(InputArray src, OutputArray dst, InputArray kernel, Point anchor=Point(-1,-1), int iterations=1, int borderType=BORDER_CONSTANT, const Scalar& borderValue=morphologyDefaultBorderValue()
         cv::dilate(redBallOnly, redBallOnly, cv::Mat(), cv::Point(-1,-1), dilate_niter, cv::BORDER_CONSTANT, cv::morphologyDefaultBorderValue());
         mutex.unlock();
         
         mutex.lock();
+         //void erode(InputArray src, OutputArray dst, InputArray kernel, Point anchor=Point(-1,-1), int iterations=1, int borderType=BORDER_CONSTANT, const Scalar& borderValue=morphologyDefaultBorderValue() )
         cv::erode(redBallOnly, redBallOnly, cv::Mat(), cv::Point(-1,-1), erode_niter, cv::BORDER_CONSTANT, cv::morphologyDefaultBorderValue());
         mutex.unlock();
         
         std::vector<cv::Vec3f> circles;
-
+        //void HoughCircles(InputArray image, OutputArray circles, int method, double dp, double minDist, double param1=100, double param2=100, int minRadius=0, int maxRadius=0 )
         cv::HoughCircles(redBallOnly, circles, CV_HOUGH_GRADIENT, 1, redBallOnly.rows / 8, HIGH_THRESHOLD, HOUGH_MIN_VOTES, HOUGH_MIN_RADIUS, HOUGH_MAX_RADIUS);
 
         yDebug("Found %lu circles", circles.size());
@@ -159,9 +163,9 @@ public:
             cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
             int radius = cvRound(circles[i][2]);
             // circle center
-            circle(in_cv, center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
+            circle(in_cv, center, 3, cv::Scalar(0, 255, 0), -1, 8);
             // circle outline
-            circle(in_cv, center, radius, cv::Scalar(0, 0, 255), 3, 8, 0);
+            circle(in_cv, center, radius, cv::Scalar(0, 0, 255), 3, 8);
 
             yarp::os::Bottle &t=outTargets.addList();
             t.addDouble(center.x);
