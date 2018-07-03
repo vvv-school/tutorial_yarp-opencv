@@ -27,6 +27,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>
 
+#include <cstdlib>
 #include <vector>
 #include <iostream>
 
@@ -364,7 +365,7 @@ public:
         std::string moduleName = rf.check("name", yarp::os::Value("yarp-opencv"), "module name (string)").asString();
         setName(moduleName.c_str());
 
-        rpcPort.open(("/"+getName("/rpc")).c_str());
+        rpcPort.open("/"+getName("/rpc"));
 
         closing = false;
 
@@ -415,7 +416,7 @@ int main(int argc, char *argv[])
     if (!yarp.checkNetwork())
     {
         yError("YARP server not available!");
-        return 1;
+        return EXIT_FAILURE;
     }
 
     Module module;
