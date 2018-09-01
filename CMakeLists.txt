@@ -5,7 +5,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(yarp-opencv)
 
-find_package(YARP REQUIRED)
+find_package(YARP 3.0.0 REQUIRED)
 find_package(ICUBcontrib REQUIRED)
 find_package(OpenCV REQUIRED)
 list(APPEND CMAKE_MODULE_PATH ${ICUBCONTRIB_MODULE_PATH})
