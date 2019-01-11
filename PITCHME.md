@@ -48,7 +48,7 @@ void close()(){
     BufferedPort<yarp::sig::ImageOf<yarp::sig::PixelRgb> >::close();
 }
 void onRead( yarp::sig::ImageOf<yarp::sig::PixelRgb> &img ){
-    cv::Mat in_cv = cv::cvarrToMat((IplImage *)img.getIplImage());
+    cv::Mat in_cv = yarp::cv::toCvMat( img );
 }
 ```
 #HSLIDE

@@ -23,6 +23,7 @@
 #include <yarp/os/LogStream.h>
 #include <yarp/os/Semaphore.h>
 #include <yarp/sig/Image.h>
+#include <yarp/cv/Cv.h>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>
@@ -125,10 +126,10 @@ public:
 
         outEdges.zero();
 
-        cv::Mat in_cv = cv::cvarrToMat((IplImage *)outImage.getIplImage());
+        cv::Mat in_cv = yarp::cv::toCvMat(outImage);
         outImage = img;
 
-        cv::Mat redBallOnly = cv::cvarrToMat((IplImage *)outEdges.getIplImage());
+        cv::Mat redBallOnly = yarp::cv::toCvMat(outEdges);
         
         mutex.lock();
         //void inRange(InputArray src, InputArray lowerb, InputArray upperb, OutputArray dst)
