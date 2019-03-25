@@ -7,26 +7,26 @@
 #include <cmath>
 #include <algorithm>
 
-#include <yarp/rtf/TestCase.h>
-#include <rtf/dll/Plugin.h>
-#include <rtf/TestAssert.h>
+#include <yarp/robottestingframework/TestCase.h>
+#include <robottestingframework/dll/Plugin.h>
+#include <robottestingframework/TestAssert.h>
 
 
 #include <yarp/os/Network.h>
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/Time.h>
 
-using namespace RTF;
+using namespace robottestingframework;
 
 /**********************************************************************/
-class TestTutorialYarpOpencv : public yarp::rtf::TestCase
+class TestTutorialYarpOpencv : public yarp::robottestingframework::TestCase
 {
     yarp::os::BufferedPort<yarp::os::Bottle> port;
 
 public:
     /******************************************************************/
     TestTutorialYarpOpencv() :
-        yarp::rtf::TestCase("TestTutorialYarpOpencv")
+        yarp::robottestingframework::TestCase("TestTutorialYarpOpencv")
     {
     }
 
@@ -39,7 +39,7 @@ public:
     virtual bool setup(yarp::os::Property& property)
     {
         port.open("/"+getName()+"/target:i");
-        RTF_ASSERT_ERROR_IF_FALSE(yarp::os::Network::connect("/yarp-opencv/target:o",port.getName()),
+        ROBOTTESTINGFRAMEWORK_ASSERT_ERROR_IF_FALSE(yarp::os::Network::connect("/yarp-opencv/target:o",port.getName()),
                                   "Unable to connect to target!");
 
         return true;
@@ -56,7 +56,7 @@ public:
     {
         yarp::os::Time::delay(5.0);
 
-        RTF_TEST_REPORT("Checking target position in the image");
+        ROBOTTESTINGFRAMEWORK_TEST_REPORT("Checking target position in the image");
         int correct = 0;
         int errors  = 0;
         for (double t0=yarp::os::Time::now(); yarp::os::Time::now()-t0<15.0;)
@@ -73,12 +73,12 @@ public:
                 else
                   errors++;
 
-                //RTF_TEST_REPORT(Asserter::format("RESPONSE IS : %lf %lf\n", responseX, responseY));
+                //ROBOTTESTINGFRAMEWORK_TEST_REPORT(Asserter::format("RESPONSE IS : %lf %lf\n", responseX, responseY));
             }
         }
-        RTF_TEST_REPORT(Asserter::format("CORRECTNESS IS : %d %d\n", correct, errors));
-        RTF_TEST_CHECK( (correct > errors), "Checking passing of test");
+        ROBOTTESTINGFRAMEWORK_TEST_REPORT(Asserter::format("CORRECTNESS IS : %d %d\n", correct, errors));
+        ROBOTTESTINGFRAMEWORK_TEST_CHECK( (correct > errors), "Checking passing of test");
     }
 };
 
-PREPARE_PLUGIN(TestTutorialYarpOpencv)
+ROBOTTESTINGFRAMEWORK_PREPARE_PLUGIN(TestTutorialYarpOpencv)
