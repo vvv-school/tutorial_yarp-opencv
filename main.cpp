@@ -21,7 +21,6 @@
 #include <yarp/os/Network.h>
 #include <yarp/os/Log.h>
 #include <yarp/os/LogStream.h>
-#include <yarp/os/Semaphore.h>
 #include <yarp/sig/Image.h>
 #include <yarp/cv/Cv.h>
 
@@ -29,6 +28,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <cstdlib>
+#include <mutex>
 #include <vector>
 #include <iostream>
 
@@ -53,7 +53,7 @@ class Processing : public yarp::os::BufferedPort<yarp::sig::ImageOf<yarp::sig::P
     std::vector<int32_t> lowBound;
     std::vector<int32_t> highBound;
     
-    yarp::os::Mutex mutex;
+    std::mutex mtx;
     
     int dilate_niter;
     int erode_niter;
@@ -131,25 +131,19 @@ public:
 
         cv::Mat redBallOnly = yarp::cv::toCvMat(outEdges);
         
-        mutex.lock();
+        mtx.lock();
         //void inRange(InputArray src, InputArray lowerb, InputArray upperb, OutputArray dst)
         cv::inRange(in_cv, cv::Scalar(lowBound[0], lowBound[1], lowBound[2]), cv::Scalar(highBound[0], highBound[1], highBound[2]), redBallOnly);
-        mutex.unlock();
 
-        mutex.lock();
         //void GaussianBlur(InputArray src, OutputArray dst, Size ksize, double sigmaX=0, double sigmaY=0, int borderType=BORDER_DEFAULT )
         cv::GaussianBlur(redBallOnly, redBallOnly, cv::Size(gausian_size, gausian_size), 2, 2);
-        mutex.unlock();
 
-        mutex.lock();
         //void dilate(InputArray src, OutputArray dst, InputArray kernel, Point anchor=Point(-1,-1), int iterations=1, int borderType=BORDER_CONSTANT, const Scalar& borderValue=morphologyDefaultBorderValue()
         cv::dilate(redBallOnly, redBallOnly, cv::Mat(), cv::Point(-1,-1), dilate_niter, cv::BORDER_CONSTANT, cv::morphologyDefaultBorderValue());
-        mutex.unlock();
         
-        mutex.lock();
          //void erode(InputArray src, OutputArray dst, InputArray kernel, Point anchor=Point(-1,-1), int iterations=1, int borderType=BORDER_CONSTANT, const Scalar& borderValue=morphologyDefaultBorderValue() )
         cv::erode(redBallOnly, redBallOnly, cv::Mat(), cv::Point(-1,-1), erode_niter, cv::BORDER_CONSTANT, cv::morphologyDefaultBorderValue());
-        mutex.unlock();
+        mtx.unlock();
         
         std::vector<cv::Vec3f> circles;
         //void HoughCircles(InputArray image, OutputArray circles, int method, double dp, double minDist, double param1=100, double param2=100, int minRadius=0, int maxRadius=0 )
@@ -184,71 +178,63 @@ public:
     /********************************************************/
     bool setLowerBound(const int32_t r, const int32_t g, const int32_t b)
     {
-        mutex.lock();
+        lock_guard<mutex> lck(mtx);
         lowBound.clear();
         lowBound.push_back(r);
         lowBound.push_back(g);
         lowBound.push_back(b);
-        mutex.unlock();
         return true;
     }
     /********************************************************/
     bool setUpperBound(const int32_t r, const int32_t g, const int32_t b)
     {
-        mutex.lock();
+        lock_guard<mutex> lck(mtx);
         highBound.clear();
         highBound.push_back(r);
         highBound.push_back(g);
         highBound.push_back(b);
-        mutex.unlock();
         return true;
     }
     
     /********************************************************/
     bool setDilateIter(const int32_t iter)
     {
-        mutex.lock();
+        lock_guard<mutex> lck(mtx);
         dilate_niter = iter;
-        mutex.unlock();
         return true;
     }
     
     /********************************************************/
     bool setErodeIter(const int32_t iter)
     {
-        mutex.lock();
+        lock_guard<mutex> lck(mtx);
         erode_niter = iter;
-        mutex.unlock();
         return true;
     }
     
     /********************************************************/
     bool setGausianSize(const int32_t size)
     {
-        mutex.lock();
+        lock_guard<mutex> lck(mtx);
         gausian_size = size;
-        mutex.unlock();
         return true;
     }
     
     /********************************************************/
     std::vector<int32_t> getLowerBound()
     {
+        lock_guard<mutex> lck(mtx);
         std::vector<int32_t> v;
-        mutex.lock();
-        v = lowBound;
-        mutex.unlock();
-        
+        v = lowBound;     
         return v;
     }
     
     /********************************************************/
     std::vector<int32_t> getUpperBound()
     {
+        lock_guard<mutex> lck(mtx);
         std::vector<int32_t> v;
-        mutex.lock();
         v = highBound;
-        mutex.unlock();
         return v;
     }
     
