@@ -131,7 +131,7 @@ public:
 
         cv::Mat redBallOnly = yarp::cv::toCvMat(outEdges);
         
-        mtx.lock();
+        const std::lock_guard<std::mutex> lock(mtx);
         //void inRange(InputArray src, InputArray lowerb, InputArray upperb, OutputArray dst)
         cv::inRange(in_cv, cv::Scalar(lowBound[0], lowBound[1], lowBound[2]), cv::Scalar(highBound[0], highBound[1], highBound[2]), redBallOnly);
 
@@ -143,7 +143,6 @@ public:
         
          //void erode(InputArray src, OutputArray dst, InputArray kernel, Point anchor=Point(-1,-1), int iterations=1, int borderType=BORDER_CONSTANT, const Scalar& borderValue=morphologyDefaultBorderValue() )
         cv::erode(redBallOnly, redBallOnly, cv::Mat(), cv::Point(-1,-1), erode_niter, cv::BORDER_CONSTANT, cv::morphologyDefaultBorderValue());
-        mtx.unlock();
         
         std::vector<cv::Vec3f> circles;
         //void HoughCircles(InputArray image, OutputArray circles, int method, double dp, double minDist, double param1=100, double param2=100, int minRadius=0, int maxRadius=0 )
@@ -178,7 +177,7 @@ public:
     /********************************************************/
     bool setLowerBound(const int32_t r, const int32_t g, const int32_t b)
     {
-        lock_guard<mutex> lck(mtx);
+        const std::lock_guard<std::mutex> lock(mtx);
         lowBound.clear();
         lowBound.push_back(r);
         lowBound.push_back(g);
@@ -188,7 +187,7 @@ public:
     /********************************************************/
     bool setUpperBound(const int32_t r, const int32_t g, const int32_t b)
     {
-        lock_guard<mutex> lck(mtx);
+        const std::lock_guard<std::mutex> lock(mtx);
         highBound.clear();
         highBound.push_back(r);
         highBound.push_back(g);
@@ -199,7 +198,7 @@ public:
     /********************************************************/
     bool setDilateIter(const int32_t iter)
     {
-        lock_guard<mutex> lck(mtx);
+        const std::lock_guard<std::mutex> lock(mtx);
         dilate_niter = iter;
         return true;
     }
@@ -207,7 +206,7 @@ public:
     /********************************************************/
     bool setErodeIter(const int32_t iter)
     {
-        lock_guard<mutex> lck(mtx);
+        const std::lock_guard<std::mutex> lock(mtx);
         erode_niter = iter;
         return true;
     }
@@ -215,7 +214,7 @@ public:
     /********************************************************/
     bool setGausianSize(const int32_t size)
     {
-        lock_guard<mutex> lck(mtx);
+        const std::lock_guard<std::mutex> lock(mtx);
         gausian_size = size;
         return true;
     }
@@ -223,7 +222,7 @@ public:
     /********************************************************/
     std::vector<int32_t> getLowerBound()
     {
-        lock_guard<mutex> lck(mtx);
+        const std::lock_guard<std::mutex> lock(mtx);
         std::vector<int32_t> v;
         v = lowBound;     
         return v;
@@ -232,7 +231,7 @@ public:
     /********************************************************/
     std::vector<int32_t> getUpperBound()
     {
-        lock_guard<mutex> lck(mtx);
+        const std::lock_guard<std::mutex> lock(mtx);
         std::vector<int32_t> v;
         v = highBound;
         return v;
