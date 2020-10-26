@@ -9,5 +9,4 @@ tasks:
 - init: init-icubcontrib.sh
 - command: start-vnc-session.sh
 - command: gp await-port 6080 && gp preview $(gp url 6080)
-- command: mkdir datasets && cd datasets && wget http://www.icub.org/download/software/datasetplayer-demo/testData_20120803_095402.zip
-- command: cd datasets && unzip testData_20120803_095402.zip
+- command: mkdir datasets && cd datasets && wget http://www.icub.org/download/software/datasetplayer-demo/testData_20120803_095402.zip && unzip testData_20120803_095402.zip
