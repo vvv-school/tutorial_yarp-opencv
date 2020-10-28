@@ -19,5 +19,6 @@ fi
 
 yarpdataplayer &
 sleep 3
-echo "load $ROBOT_CODE/datasets/testData_20120803_095402" | yarp rpc /yarpdataplayer/rpc:i
+#echo "load $ROBOT_CODE/datasets/testData_20120803_095402" | yarp rpc /yarpdataplayer/rpc:i
+echo "load /workspace/datasets/testData_20120803_095402" | yarp rpc /yarpdataplayer/rpc:i
 echo "play" | yarp rpc /yarpdataplayer/rpc:i
