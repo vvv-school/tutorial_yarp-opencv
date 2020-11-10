@@ -9,7 +9,7 @@ This second tutorial will guide you through integrating YARP with OpenCV while g
 
 The task at hand is to correctly detect a red ball from images from a dataset streamed through a port.
 
-The dataset is currently available on the provided virtual machine. Otherwise it can be downloaded following these simple steps:
+The dataset is currently available on the provided virtual environment. Otherwise, it can be downloaded following these simple steps:
 ```sh
 cd $DATASETS_PATH
 $ wget http://www.icub.org/download/software/datasetplayer-demo/testData_20120803_095402.zip
