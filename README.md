@@ -11,9 +11,9 @@ The task at hand is to correctly detect a red ball from images from a dataset st
 
 The dataset is currently available on the provided virtual environment. Otherwise, it can be downloaded following these simple steps:
 ```sh
-cd $DATASETS_PATH
 $ wget http://www.icub.org/download/software/datasetplayer-demo/testData_20120803_095402.zip
 $ unzip testData_20120803_095402.zip
 ```
+Finally, create the env var `DATASETS_PATH` pointing to the location where you've unzipped the archieve.
 
 # [How to complete the assignment](https://github.com/vvv-school/vvv-school.github.io/blob/master/instructions/how-to-complete-assignments.md)
