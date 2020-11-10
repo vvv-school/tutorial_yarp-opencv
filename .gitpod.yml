@@ -6,7 +6,11 @@ ports:
   onOpen: ignore
 workspaceLocation: "."
 tasks:
-- init: init-icubcontrib.sh
+- init: |
+    init-icubcontrib.sh
+    mkdir -p /workspace/datasets && cd /workspace/datasets
+    wget http://www.icub.org/download/software/datasetplayer-demo/testData_20120803_095402.zip
+    unzip testData_20120803_095402.zip
+    rm testData_20120803_095402.zip
 - command: start-vnc-session.sh
 - command: gp await-port 6080 && gp preview $(gp url 6080)
-- command: mkdir datasets && cd datasets && wget http://www.icub.org/download/software/datasetplayer-demo/testData_20120803_095402.zip && unzip testData_20120803_095402.zip
