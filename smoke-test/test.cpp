@@ -4,6 +4,8 @@
  * CopyPolicy: Released under the terms of the GNU GPL v3.0.
 */
 
+#include <cstdlib>
+#include <string>
 #include <cmath>
 #include <algorithm>
 
@@ -14,6 +16,8 @@
 
 #include <yarp/os/Network.h>
 #include <yarp/os/BufferedPort.h>
+#include <yarp/os/RpcClient.h>
+#include <yarp/os/Bottle.h>
 #include <yarp/os/Time.h>
 
 using namespace robottestingframework;
@@ -21,7 +25,8 @@ using namespace robottestingframework;
 /**********************************************************************/
 class TestTutorialYarpOpencv : public yarp::robottestingframework::TestCase
 {
-    yarp::os::BufferedPort<yarp::os::Bottle> port;
+    yarp::os::RpcClient playerPort;
+    yarp::os::BufferedPort<yarp::os::Bottle> targetPort;
 
 public:
     /******************************************************************/
@@ -38,9 +43,30 @@ public:
     /******************************************************************/
     virtual bool setup(yarp::os::Property& property)
     {
-        port.open("/"+getName()+"/target:i");
-        ROBOTTESTINGFRAMEWORK_ASSERT_ERROR_IF_FALSE(yarp::os::Network::connect("/yarp-opencv/target:o",port.getName()),
+        ROBOTTESTINGFRAMEWORK_ASSERT_ERROR_IF_FALSE(property.check("dataset"),"Dataset is unspecified!");
+        std::string path = std::getenv("DATASETS_PATH");
+        std::string dataset = property.find("dataset").asString();
+
+        playerPort.open("/"+getName()+"/player:rpc");
+        targetPort.open("/"+getName()+"/target:i");
+        ROBOTTESTINGFRAMEWORK_ASSERT_ERROR_IF_FALSE(yarp::os::Network::connect(playerPort.getName(),"/yarpdataplayer/rpc:i"),
+                                  "Unable to connect to yarpdataplayer!");
+        ROBOTTESTINGFRAMEWORK_ASSERT_ERROR_IF_FALSE(yarp::os::Network::connect("/yarp-opencv/target:o",targetPort.getName()),
                                   "Unable to connect to target!");
+
+        yarp::os::Bottle cmd,rep;
+        cmd.addString("load");
+        cmd.addString(path+"/"+dataset);
+        ROBOTTESTINGFRAMEWORK_TEST_REPORT(Asserter::format("Loading %s ...",cmd.toString().c_str()));
+        playerPort.write(cmd,rep);
+
+        // connect ports opened up by yarpdataplayer
+        ROBOTTESTINGFRAMEWORK_ASSERT_ERROR_IF_FALSE(yarp::os::Network::connect("/icub/camcalib/left/out","/yarp-opencv/image:i"),
+                                  "Unable to connect dataset specific ports");
+
+        cmd.clear();
+        cmd.addString("play");
+        playerPort.write(cmd,rep);
 
         return true;
     }
@@ -48,7 +74,12 @@ public:
     /******************************************************************/
     virtual void tearDown()
     {
-        port.close();
+        yarp::os::Bottle cmd,rep;
+        cmd.addString("stop");
+        playerPort.write(cmd,rep);
+
+        playerPort.close();
+        targetPort.close();
     }
 
     /******************************************************************/
@@ -61,7 +92,7 @@ public:
         int errors  = 0;
         for (double t0=yarp::os::Time::now(); yarp::os::Time::now()-t0<15.0;)
         {
-            yarp::os::Bottle *pTarget=port.read(false);
+            yarp::os::Bottle *pTarget=targetPort.read(false);
             if (pTarget!=NULL)
             {
                 double responseX = pTarget->get(0).asList()->get(0).asDouble();
