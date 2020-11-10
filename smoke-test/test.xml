@@ -4,5 +4,5 @@
     <description>Testing the tutorial on tracking with yarp+opencv </description>
     <fixture param="--fixture fixture.xml"> yarpmanager </fixture>
 
-    <test type="dll"> TestTutorialYarpOpencv </test>
+    <test type="dll" param="--dataset testData_20120803_095402"> TestTutorialYarpOpencv </test>
 </suite>
