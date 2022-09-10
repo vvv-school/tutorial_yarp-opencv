@@ -7,7 +7,6 @@ ports:
 workspaceLocation: "."
 tasks:
 - init: |
-    init-icubcontrib.sh
     mkdir -p /workspace/datasets && cd /workspace/datasets
     wget http://www.icub.org/download/software/datasetplayer-demo/testData_20120803_095402.zip
     unzip testData_20120803_095402.zip
