@@ -12,4 +12,4 @@ tasks:
     unzip testData_20120803_095402.zip
     rm testData_20120803_095402.zip
 - command: start-vnc-session.sh
-- command: gp await-port 6080 && gp preview $(gp url 6080)
+- command: gp ports await 6080 && gp preview $(gp url 6080)
